@@ -8,7 +8,6 @@
 
 - `ipk/ddns-scripts-cloudflare_2.8.2-r64.1_all.ipk`：Cloudflare DDNS 脚本。
 - `ipk/luci-theme-argon_2.2.4-20200821_all.ipk`：LuCI Argon 主题。
-- `ipk/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk`：LuCI Material 主题。
 
 ### 脚本
 
@@ -30,12 +29,6 @@ curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/ddns-scri
 
 ```sh
 curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-argon_2.2.4-20200821_all.ipk" -o "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk" && opkg install "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk"
-```
-
-### 安装 luci-theme-material
-
-```sh
-curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk" -o "/tmp/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk" && opkg install "/tmp/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk"
 ```
 
 ### 安装菜单布局
@@ -70,12 +63,6 @@ curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/hea
 
 ```sh
 curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-argon_2.2.4-20200821_all.ipk" -o "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk" && opkg install "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk"
-```
-
-### 安装 luci-theme-material
-
-```sh
-curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk" -o "/tmp/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk" && opkg install "/tmp/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk"
 ```
 
 ### 安装菜单布局

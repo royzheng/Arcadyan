@@ -14,7 +14,6 @@
 
 - `ipk/ddns-scripts-cloudflare_2.8.2-r64.1_all.ipk`
 - `ipk/luci-theme-argon_2.2.4-20200821_all.ipk`
-- `ipk/luci-theme-material_git-22.115.68448-712bc8e-1_all.ipk`
 - `scripts/router-menu-layout.sh`
 
 ## 下载地址规则
