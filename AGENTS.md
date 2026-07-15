@@ -42,7 +42,15 @@ README 的命令顺序必须保持为：先集中列出全部 GitHub 直连 `cur
 - `verify`：确认每项修复已应用且目标文件语法正确。
 - `help`、`-h`、`--help`：显示用法。
 
-当前登记的 `fibo_rndis procd lock` 修复会删除 `/etc/init.d/fibo_rndis.init` 中唯一且精确匹配的 `USE_PROCD=1`，解决 procd 锁导致 LuCI“启动项”页面阻塞的问题。脚本不提供 `uninstall`：不要添加持久备份或恢复故障状态的逻辑。新增修复时，必须分别实现 `fix_*()`、`status_*()`、`verify_*()`，并登记到 `apply_all()`、`status_all()`、`verify_all()`。每项修复必须先识别状态、保持幂等，在目标布局异常时停止，而不是盲目编辑。保留 `ROOT` 前缀，以便在提取的测试根目录中验证修改。
+当前登记的修复：
+
+- `fibo_rndis procd lock`：删除 `/etc/init.d/fibo_rndis.init` 中唯一且精确匹配的 `USE_PROCD=1`，解决 procd 锁导致 LuCI“启动项”页面阻塞的问题。
+- `legacy ntpclient removal`：移除 `ntpclient` 及其反向依赖 `luci-app-ntpc`、`luci-i18n-ntpc-*`，清理旧配置、controller、model、ACL、hotplug 和可执行文件。该旧客户端会阻止标准 `sysntpd -l` 绑定 NTP 服务端端口。清理 LuCI index/module cache 后必须停止并重新启动 `uhttpd`，使 `/cgi-bin/luci/admin/system/ntpc` 页面及菜单立即消失。`ROOT` 模式只清理测试根目录中的模拟文件，不得调用真实 `opkg` 或控制服务。
+- `standard sysntpd configuration`：将 `ntp1.aliyun.com`、`ntp.tencent.com`、`ntp.ntsc.ac.cn`、`time.apple.com` 按顺序写入 `system.ntp.server`，将 `system.ntp.use_dhcp` 设为 `0`、`system.ntp.enable_server` 设为 `1`，并删除 `system.ntp.enabled` 以启用客户端。应用后重启 `sysntpd`；真实设备上的验证必须确认 `ntpd` 正在运行，命令行包含 `-l` 和全部四个 `-p` 上游。
+
+NTP 修复必须继续在私有临时目录中对 `/etc/config/system` 副本执行 UCI 变更，导出并重新解析验证后才替换正式文件，避免提交 `/tmp/.uci` 中不相关的待定修改。替换时保留原文件所有者和权限；失败时恢复临时备份。`ROOT` 非空时不得重启服务。
+
+脚本不提供 `uninstall`：不要添加持久备份或恢复故障状态的逻辑。新增修复时，必须分别实现 `fix_*()`、`status_*()`、`verify_*()`，并登记到 `apply_all()`、`status_all()`、`verify_all()`。每项修复必须先识别状态、保持幂等，在目标布局异常时停止，而不是盲目编辑。保留 `ROOT` 前缀，以便在提取的测试根目录中验证修改。
 
 `scripts/router-menu-layout.sh` 仅接受以下参数之一：
 

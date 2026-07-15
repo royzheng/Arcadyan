@@ -11,7 +11,7 @@
 
 ### 脚本
 
-- `scripts/router-bugfixes.sh`：集中应用路由器固件修复。目前用于修复 `fibo_rndis.init` 错误启用 procd、导致 LuCI“启动项”页面永久阻塞的问题。支持 `apply`、`status`、`verify`；不传参数时默认为 `apply`。
+- `scripts/router-bugfixes.sh`：集中应用路由器固件修复。目前包括 LuCI“启动项”页面阻塞修复、移除冲突的旧 `ntpclient` 栈，以及配置标准 `sysntpd`。支持 `apply`、`status`、`verify`；不传参数时默认为 `apply`。
 - `scripts/router-menu-layout.sh`：调整或恢复路由器 LuCI 菜单布局，并可查看当前状态。参数必须是 `install`、`uninstall`、`status` 其中之一；不传参数时默认为 `status`。
 
 > 以下命令应在 Arcadyan / OpenWrt 设备的 root shell 中执行。IPK 安装所需的依赖仍由设备上的 `opkg` 负责解析。
@@ -129,7 +129,20 @@ curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/hea
 - `verify`：检查全部修复是否已应用，并验证相关文件语法；任一检查失败时返回非零状态。
 - `help`、`-h`、`--help`：显示用法。
 
-目前登记的修复会从 `/etc/init.d/fibo_rndis.init` 中删除错误的 `USE_PROCD=1`。该厂商脚本只实现了 `boot()`、没有实现 procd 的 `start_service()`，错误启用 procd 会让相关进程长期持有锁，从而阻塞 LuCI 的“启动项”页面。脚本只在目标内容符合预期时修改文件，修改后会执行 shell 语法验证；在真实设备上还会清理已经阻塞的只读 `enabled` 查询进程。
+目前登记了以下修复：
+
+1. **fibo_rndis procd 锁**：从 `/etc/init.d/fibo_rndis.init` 中删除错误的 `USE_PROCD=1`。该厂商脚本只实现了 `boot()`、没有实现 procd 的 `start_service()`，错误启用 procd 会让相关进程长期持有锁，从而阻塞 LuCI 的“启动项”页面。脚本只在目标内容符合预期时修改文件，修改后会执行 shell 语法验证；在真实设备上还会清理已经阻塞的只读 `enabled` 查询进程。
+2. **移除旧 ntpclient**：卸载 `ntpclient`、`luci-app-ntpc` 及所有已安装的 `luci-i18n-ntpc-*` 语言包，并清理旧配置和 LuCI 缓存。旧页面 `/cgi-bin/luci/admin/system/ntpc` 使用独立的 `/etc/config/ntpclient`，其客户端会占用 UDP 123，导致标准 `sysntpd` 在启用服务端模式后启动失败。移除页面后，脚本会停止并重新启动 `uhttpd`，确保 LuCI 菜单缓存立即刷新。
+3. **标准 sysntpd 配置**：将下面四个服务器按顺序写入 `/etc/config/system` 的 `system.ntp.server`：
+
+   - `ntp1.aliyun.com`
+   - `ntp.tencent.com`
+   - `ntp.ntsc.ac.cn`
+   - `time.apple.com`
+
+脚本会设置 `system.ntp.use_dhcp=0`，防止 DHCP 追加其他上游；删除可能禁用客户端的 `system.ntp.enabled`，并设置 `system.ntp.enable_server=1`，让路由器同时向上游校时并为局域网提供 NTP 服务。应用后会重启 `sysntpd`，并确认运行命令包含服务端参数 `-l` 和全部四个上游。
+
+NTP 配置会先在临时副本中生成并校验，再替换正式配置；不会提交 LuCI 或其他 UCI 客户端留下的未保存改动。`verify` 会检查 `sysntpd` 进程和启动参数，但不代表对每个公网 NTP 服务器进行实时可达性测试。
 
 `router-bugfixes.sh` 是单向修复聚合脚本，不提供 `uninstall` 或恢复故障的操作。
 
