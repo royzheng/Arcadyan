@@ -11,6 +11,7 @@
 
 ### 脚本
 
+- `scripts/router-bugfixes.sh`：集中应用路由器固件修复。目前用于修复 `fibo_rndis.init` 错误启用 procd、导致 LuCI“启动项”页面永久阻塞的问题。支持 `apply`、`status`、`verify`；不传参数时默认为 `apply`。
 - `scripts/router-menu-layout.sh`：调整或恢复路由器 LuCI 菜单布局，并可查看当前状态。参数必须是 `install`、`uninstall`、`status` 其中之一；不传参数时默认为 `status`。
 
 > 以下命令应在 Arcadyan / OpenWrt 设备的 root shell 中执行。IPK 安装所需的依赖仍由设备上的 `opkg` 负责解析。
@@ -29,6 +30,24 @@ curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/ddns-scri
 
 ```sh
 curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-argon_2.2.4-20200821_all.ipk" -o "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk" && opkg install "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk"
+```
+
+### 应用全部路由器问题修复
+
+```sh
+curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" apply
+```
+
+### 查看路由器问题修复状态
+
+```sh
+curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" status
+```
+
+### 验证全部路由器问题修复
+
+```sh
+curl -fL "https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" verify
 ```
 
 ### 安装菜单布局
@@ -65,6 +84,24 @@ curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/hea
 curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/ipk/luci-theme-argon_2.2.4-20200821_all.ipk" -o "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk" && opkg install "/tmp/luci-theme-argon_2.2.4-20200821_all.ipk"
 ```
 
+### 应用全部路由器问题修复
+
+```sh
+curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" apply
+```
+
+### 查看路由器问题修复状态
+
+```sh
+curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" status
+```
+
+### 验证全部路由器问题修复
+
+```sh
+curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/heads/main/scripts/router-bugfixes.sh" -o "/tmp/router-bugfixes.sh" && sh "/tmp/router-bugfixes.sh" verify
+```
+
 ### 安装菜单布局
 
 ```sh
@@ -84,6 +121,19 @@ curl -fL "https://gh-proxy.org/https://github.com/royzheng/Arcadyan/raw/refs/hea
 ```
 
 ## 脚本参数说明
+
+### router-bugfixes.sh
+
+- `apply`：应用全部已登记修复，并在完成后自动验证；不传参数时默认执行此操作。可重复执行，已修复的项目会被跳过。
+- `status`：只显示每项修复是 `[pending]` 还是 `[fixed]`，不修改系统。
+- `verify`：检查全部修复是否已应用，并验证相关文件语法；任一检查失败时返回非零状态。
+- `help`、`-h`、`--help`：显示用法。
+
+目前登记的修复会从 `/etc/init.d/fibo_rndis.init` 中删除错误的 `USE_PROCD=1`。该厂商脚本只实现了 `boot()`、没有实现 procd 的 `start_service()`，错误启用 procd 会让相关进程长期持有锁，从而阻塞 LuCI 的“启动项”页面。脚本只在目标内容符合预期时修改文件，修改后会执行 shell 语法验证；在真实设备上还会清理已经阻塞的只读 `enabled` 查询进程。
+
+`router-bugfixes.sh` 是单向修复聚合脚本，不提供 `uninstall` 或恢复故障的操作。
+
+### router-menu-layout.sh
 
 `router-menu-layout.sh` 支持以下操作：
 

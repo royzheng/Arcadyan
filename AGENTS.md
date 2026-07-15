@@ -14,6 +14,7 @@
 
 - `ipk/ddns-scripts-cloudflare_2.8.2-r64.1_all.ipk`
 - `ipk/luci-theme-argon_2.2.4-20200821_all.ipk`
+- `scripts/router-bugfixes.sh`
 - `scripts/router-menu-layout.sh`
 
 ## 下载地址规则
@@ -34,13 +35,22 @@ README 的命令顺序必须保持为：先集中列出全部 GitHub 直连 `cur
 
 ## 脚本约定
 
+`scripts/router-bugfixes.sh` 是可重复执行的单向问题修复聚合脚本，接受以下参数：
+
+- `apply`：应用并验证全部修复；无参数时也执行此操作。
+- `status`：显示每项修复是否待应用。
+- `verify`：确认每项修复已应用且目标文件语法正确。
+- `help`、`-h`、`--help`：显示用法。
+
+当前登记的 `fibo_rndis procd lock` 修复会删除 `/etc/init.d/fibo_rndis.init` 中唯一且精确匹配的 `USE_PROCD=1`，解决 procd 锁导致 LuCI“启动项”页面阻塞的问题。脚本不提供 `uninstall`：不要添加持久备份或恢复故障状态的逻辑。新增修复时，必须分别实现 `fix_*()`、`status_*()`、`verify_*()`，并登记到 `apply_all()`、`status_all()`、`verify_all()`。每项修复必须先识别状态、保持幂等，在目标布局异常时停止，而不是盲目编辑。保留 `ROOT` 前缀，以便在提取的测试根目录中验证修改。
+
 `scripts/router-menu-layout.sh` 仅接受以下参数之一：
 
 - `install`：安装菜单布局调整。
 - `uninstall`：撤销菜单布局调整。
 - `status`：显示当前布局状态；无参数时也执行此操作。
 
-脚本应继续兼容 OpenWrt 的 `/bin/sh`（BusyBox `ash`）。更新脚本时保留可执行权限，不要引入仅 Bash 支持的语法。脚本会修改 LuCI controller 文件，因此必须保持重复执行安全、修改前后校验以及失败回滚逻辑。
+所有脚本都应继续兼容 OpenWrt 19.07 的 `/bin/sh`（BusyBox `ash`）。更新脚本时保留可执行权限，不要引入仅 Bash 支持的语法。`router-menu-layout.sh` 会修改 LuCI controller 文件，因此必须保持重复执行安全、修改前后校验以及失败回滚逻辑。
 
 ## 更新要求
 
